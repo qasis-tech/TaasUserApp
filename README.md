@@ -1,97 +1,190 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Taas - Bathroom Finding App
 
-# Getting Started
+A React Native application that helps users find and book clean, accessible bathrooms nearby. The app provides a seamless experience for users to discover, book, and review bathroom facilities.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Features
 
-## Step 1: Start Metro
+### User Features
+- **Authentication**: Login/Register with email and password
+- **Home Screen**: Browse nearby bathrooms with search and filters
+- **Bathroom Details**: View comprehensive information including:
+  - Photos and basic details
+  - Location and pricing
+  - Provider information
+  - Reviews and ratings
+- **Booking & Payment**: Secure payment processing with multiple options
+- **Order History**: Track past bookings and write reviews
+- **Location Sharing**: Share location with providers for better service
+- **Profile Management**: View booking history and manage account
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## Screens Overview
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+### User Screens
+1. **SplashScreen** - App launch screen with animations
+2. **UserAuthScreen** - Login/Register with email/password
+3. **UserHomeScreen** - Browse and search nearby bathrooms
+4. **BathroomDetailsScreen** - Detailed bathroom information
+5. **PaymentScreen** - Payment processing with multiple methods
+6. **OrderHistoryScreen** - Past bookings and review management
+7. **ReviewScreen** - Write reviews with star ratings and photos
+8. **LocationSharingScreen** - Share location with providers
+9. **ProfileScreen** - User profile and settings
 
-```sh
-# Using npm
-npm start
+## Technical Stack
 
-# OR using Yarn
-yarn start
+- **React Native**: 0.79.4
+- **TypeScript**: For type safety
+- **React Navigation**: For screen navigation
+- **React Native Safe Area Context**: For safe area handling
+
+## Project Structure
+
+```
+src/
+├── screens/                 # All app screens
+│   ├── SplashScreen.tsx
+│   ├── UserAuthScreen.tsx
+│   ├── UserHomeScreen.tsx
+│   ├── BathroomDetailsScreen.tsx
+│   ├── PaymentScreen.tsx
+│   ├── ProfileScreen.tsx
+│   ├── OrderHistoryScreen.tsx
+│   ├── LocationSharingScreen.tsx
+│   └── ReviewScreen.tsx
+├── navigation/              # Navigation configuration
+│   └── AppNavigator.tsx
+├── types/                   # TypeScript type definitions
+│   └── index.ts
+├── components/              # Reusable components
+├── utils/                   # Utility functions
+└── assets/                  # Images, fonts, etc.
 ```
 
-## Step 2: Build and run your app
+## Key Features Implemented
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+### 1. Search and Filtering
+- Real-time search functionality
+- Multiple filter options (type, gender, etc.)
+- Dynamic result updates
 
-### Android
+### 2. Payment Integration
+- Multiple payment methods (UPI, Cards, Net Banking, Wallets)
+- Secure payment processing
+- Order summary and confirmation
 
-```sh
-# Using npm
+### 3. Review System
+- Star rating system
+- Photo upload capability
+- Review guidelines and moderation
+
+### 4. Location Services
+- GPS integration (placeholder)
+- Location sharing controls
+- Privacy-focused design
+
+### 5. Modern UI/UX
+- Clean, modern design
+- Consistent color scheme
+- Responsive layouts
+- Smooth animations
+
+## Getting Started
+
+### Prerequisites
+- Node.js (>= 18)
+- React Native CLI
+- Android Studio / Xcode
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd TaasUserApp
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. For iOS (macOS only):
+```bash
+cd ios && pod install && cd ..
+```
+
+4. Run the app:
+```bash
+# For Android
 npm run android
 
-# OR using Yarn
-yarn android
-```
-
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
+# For iOS
 npm run ios
-
-# OR using Yarn
-yarn ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+## Configuration
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+### Environment Setup
+- Update API endpoints in the respective screen files
+- Configure payment gateway credentials
+- Set up push notification services
+- Configure location services
 
-## Step 3: Modify your app
+### Backend Integration
+The app is currently using mock data. To integrate with a backend:
 
-Now that you have successfully run the app, let's make changes!
+1. Replace mock data in screen files with API calls
+2. Implement proper error handling
+3. Add loading states
+4. Set up authentication tokens
+5. Configure image upload services
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+## User Flow
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+1. **Splash Screen** → App introduction
+2. **Authentication** → Login or register
+3. **Home Screen** → Browse nearby bathrooms
+4. **Bathroom Details** → View full information
+5. **Payment** → Book and pay
+6. **Order History** → Track bookings
+7. **Reviews** → Rate and review experiences
+8. **Profile** → Manage account settings
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+## Future Enhancements
 
-## Congratulations! :tada:
+### Planned Features
+- Real-time chat with providers
+- Push notifications for booking updates
+- Emergency bathroom finder
+- Multiple language support
+- Offline mode support
+- Social media integration
+- Accessibility improvements
 
-You've successfully run and modified your React Native App. :partying_face:
+### Technical Improvements
+- State management (Redux/Context API)
+- Image caching and optimization
+- Performance optimization
+- Unit and integration tests
+- CI/CD pipeline
+- App store deployment
 
-### Now what?
+## Contributing
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
 
-# Troubleshooting
+## License
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+This project is licensed under the MIT License.
 
-# Learn More
+## Support
 
-To learn more about React Native, take a look at the following resources:
+For support and questions, please contact the development team.
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+---
+
+**Note**: This is a prototype/demo version. For production use, additional security measures, proper backend integration, and thorough testing are required.
