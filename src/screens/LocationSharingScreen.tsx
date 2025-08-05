@@ -6,11 +6,17 @@ import {
   TouchableOpacity,
   StatusBar,
   Alert,
+  ScrollView,
+  Dimensions,
 } from 'react-native';
+import { LinearGradient } from 'react-native-linear-gradient';
+import CommonHeader from '../components/CommonHeader';
 
 interface LocationSharingScreenProps {
   navigation: any;
 }
+
+const { width, height } = Dimensions.get('window');
 
 const LocationSharingScreen: React.FC<LocationSharingScreenProps> = ({ navigation }) => {
   const [isSharing, setIsSharing] = useState(false);
@@ -51,47 +57,66 @@ const LocationSharingScreen: React.FC<LocationSharingScreenProps> = ({ navigatio
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F8F9FA" />
-      
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}>
-          <Text style={styles.backButtonText}>←</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Location Sharing</Text>
-        <View style={styles.placeholder} />
-      </View>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      <CommonHeader
+        title="Location Sharing"
+        onBackPress={() => navigation.goBack()}
+      />
 
-      <View style={styles.content}>
-        {/* Map Placeholder */}
-        <View style={styles.mapContainer}>
-          <View style={styles.mapPlaceholder}>
-            <Text style={styles.mapIcon}>🗺️</Text>
-            <Text style={styles.mapText}>Map View</Text>
-            <Text style={styles.mapSubtext}>Real-time location tracking</Text>
+      <ScrollView 
+        style={styles.content} 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.contentContainer}
+      >
+        {/* Hero Section with Map */}
+        <LinearGradient
+          colors={['#667eea', '#764ba2']}
+          style={styles.heroSection}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
+          <View style={styles.mapContainer}>
+            <View style={styles.mapPlaceholder}>
+              <View style={styles.mapIconContainer}>
+                <Text style={styles.mapIcon}>🗺️</Text>
+              </View>
+              <Text style={styles.mapText}>Live Location</Text>
+              <Text style={styles.mapSubtext}>Real-time GPS tracking</Text>
+            </View>
+            <View style={styles.locationPin}>
+              <View style={styles.pinGlow} />
+              <Text style={styles.pinIcon}>📍</Text>
+            </View>
           </View>
-          <View style={styles.locationPin}>
-            <Text style={styles.pinIcon}>📍</Text>
-          </View>
-        </View>
+        </LinearGradient>
 
-        {/* Location Details */}
+        {/* Location Details Card */}
         <View style={styles.locationSection}>
-          <Text style={styles.sectionTitle}>Current Location</Text>
+          <View style={styles.sectionHeader}>
+            <View style={styles.sectionIconContainer}>
+              <Text style={styles.sectionIcon}>📍</Text>
+            </View>
+            <Text style={styles.sectionTitle}>Current Location</Text>
+          </View>
           <View style={styles.locationCard}>
             <View style={styles.locationRow}>
-              <Text style={styles.locationLabel}>Address:</Text>
+              <View style={styles.locationLabelContainer}>
+                <Text style={styles.locationLabel}>Address</Text>
+              </View>
               <Text style={styles.locationValue}>{currentLocation.address}</Text>
             </View>
             <View style={styles.locationRow}>
-              <Text style={styles.locationLabel}>Coordinates:</Text>
+              <View style={styles.locationLabelContainer}>
+                <Text style={styles.locationLabel}>Coordinates</Text>
+              </View>
               <Text style={styles.locationValue}>
                 {currentLocation.latitude.toFixed(4)}, {currentLocation.longitude.toFixed(4)}
               </Text>
             </View>
             <View style={styles.locationRow}>
-              <Text style={styles.locationLabel}>Accuracy:</Text>
+              <View style={styles.locationLabelContainer}>
+                <Text style={styles.locationLabel}>Accuracy</Text>
+              </View>
               <Text style={styles.locationValue}>{currentLocation.accuracy}</Text>
             </View>
           </View>
@@ -99,49 +124,85 @@ const LocationSharingScreen: React.FC<LocationSharingScreenProps> = ({ navigatio
 
         {/* Sharing Controls */}
         <View style={styles.controlsSection}>
-          <Text style={styles.sectionTitle}>Sharing Controls</Text>
+          <View style={styles.sectionHeader}>
+            <View style={styles.sectionIconContainer}>
+              <Text style={styles.sectionIcon}>🎛️</Text>
+            </View>
+            <Text style={styles.sectionTitle}>Sharing Controls</Text>
+          </View>
           
           {!isSharing ? (
             <TouchableOpacity
               style={styles.startSharingButton}
               onPress={handleStartSharing}>
-              <Text style={styles.startSharingIcon}>📍</Text>
-              <Text style={styles.startSharingText}>Start Location Sharing</Text>
+              <LinearGradient
+                colors={['#4facfe', '#00f2fe']}
+                style={styles.buttonGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+              >
+                <Text style={styles.startSharingIcon}>📍</Text>
+                <Text style={styles.startSharingText}>Start Location Sharing</Text>
+              </LinearGradient>
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
               style={styles.stopSharingButton}
               onPress={handleStopSharing}>
-              <Text style={styles.stopSharingIcon}>⏹️</Text>
-              <Text style={styles.stopSharingText}>Stop Location Sharing</Text>
+              <LinearGradient
+                colors={['#ff6b6b', '#ee5a24']}
+                style={styles.buttonGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+              >
+                <Text style={styles.stopSharingIcon}>⏹️</Text>
+                <Text style={styles.stopSharingText}>Stop Location Sharing</Text>
+              </LinearGradient>
             </TouchableOpacity>
           )}
 
           <TouchableOpacity
             style={styles.shareButton}
             onPress={handleShareLocation}>
-            <Text style={styles.shareButtonIcon}>📤</Text>
-            <Text style={styles.shareButtonText}>Share Current Location</Text>
+            <LinearGradient
+              colors={['#a8edea', '#fed6e3']}
+              style={styles.buttonGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            >
+              <Text style={styles.shareButtonIcon}>📤</Text>
+              <Text style={styles.shareButtonText}>Share Current Location</Text>
+            </LinearGradient>
           </TouchableOpacity>
         </View>
 
-        {/* Status */}
+        {/* Status Card */}
         <View style={styles.statusSection}>
-          <Text style={styles.sectionTitle}>Sharing Status</Text>
+          <View style={styles.sectionHeader}>
+            <View style={styles.sectionIconContainer}>
+              <Text style={styles.sectionIcon}>📊</Text>
+            </View>
+            <Text style={styles.sectionTitle}>Sharing Status</Text>
+          </View>
           <View style={[
             styles.statusCard,
-            { backgroundColor: isSharing ? '#E8F5E8' : '#FFF5F5' }
+            { 
+              backgroundColor: isSharing ? 'rgba(76, 175, 80, 0.1)' : 'rgba(244, 67, 54, 0.1)',
+              borderColor: isSharing ? 'rgba(76, 175, 80, 0.3)' : 'rgba(244, 67, 54, 0.3)'
+            }
           ]}>
-            <Text style={[
-              styles.statusIcon,
-              { color: isSharing ? '#27AE60' : '#E74C3C' }
-            ]}>
-              {isSharing ? '🟢' : '🔴'}
-            </Text>
+            <View style={styles.statusIconContainer}>
+              <Text style={[
+                styles.statusIcon,
+                { color: isSharing ? '#4CAF50' : '#F44336' }
+              ]}>
+                {isSharing ? '🟢' : '🔴'}
+              </Text>
+            </View>
             <View style={styles.statusText}>
               <Text style={[
                 styles.statusTitle,
-                { color: isSharing ? '#27AE60' : '#E74C3C' }
+                { color: isSharing ? '#4CAF50' : '#F44336' }
               ]}>
                 {isSharing ? 'Location Sharing Active' : 'Location Sharing Inactive'}
               </Text>
@@ -157,19 +218,38 @@ const LocationSharingScreen: React.FC<LocationSharingScreenProps> = ({ navigatio
 
         {/* Privacy Notice */}
         <View style={styles.privacySection}>
-          <Text style={styles.sectionTitle}>Privacy & Security</Text>
+          <View style={styles.sectionHeader}>
+            <View style={styles.sectionIconContainer}>
+              <Text style={styles.sectionIcon}>🔒</Text>
+            </View>
+            <Text style={styles.sectionTitle}>Privacy & Security</Text>
+          </View>
           <View style={styles.privacyCard}>
-            <Text style={styles.privacyIcon}>🔒</Text>
+            <View style={styles.privacyIconContainer}>
+              <Text style={styles.privacyIcon}>🔒</Text>
+            </View>
             <Text style={styles.privacyTitle}>Your Privacy Matters</Text>
-            <Text style={styles.privacyText}>
-              • Location is only shared when you explicitly enable it{'\n'}
-              • Data is encrypted and secure{'\n'}
-              • You can stop sharing at any time{'\n'}
-              • Location data is not stored permanently
-            </Text>
+            <View style={styles.privacyPoints}>
+              <View style={styles.privacyPoint}>
+                <Text style={styles.privacyPointIcon}>✓</Text>
+                <Text style={styles.privacyPointText}>Location only shared when enabled</Text>
+              </View>
+              <View style={styles.privacyPoint}>
+                <Text style={styles.privacyPointIcon}>✓</Text>
+                <Text style={styles.privacyPointText}>Data encrypted and secure</Text>
+              </View>
+              <View style={styles.privacyPoint}>
+                <Text style={styles.privacyPointIcon}>✓</Text>
+                <Text style={styles.privacyPointText}>Stop sharing anytime</Text>
+              </View>
+              <View style={styles.privacyPoint}>
+                <Text style={styles.privacyPointIcon}>✓</Text>
+                <Text style={styles.privacyPointText}>No permanent data storage</Text>
+              </View>
+            </View>
           </View>
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 };
@@ -177,214 +257,295 @@ const LocationSharingScreen: React.FC<LocationSharingScreenProps> = ({ navigatio
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 20,
-    backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F8F9FA',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  backButtonText: {
-    fontSize: 20,
-    color: '#2C3E50',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#2C3E50',
-  },
-  placeholder: {
-    width: 40,
+    backgroundColor: '#f8fafc',
   },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
+  },
+  contentContainer: {
+    paddingBottom: 40,
+  },
+  heroSection: {
+    marginBottom: 30,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    paddingBottom: 30,
   },
   mapContainer: {
-    height: 200,
-    backgroundColor: '#E8F5E8',
-    borderRadius: 16,
-    marginVertical: 20,
+    height: 250,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
+    marginHorizontal: 20,
+    marginTop: 20,
   },
   mapPlaceholder: {
     alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 20,
+    padding: 30,
+  },
+  mapIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 15,
   },
   mapIcon: {
-    fontSize: 48,
-    marginBottom: 8,
+    fontSize: 40,
   },
   mapText: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#2C3E50',
-    marginBottom: 4,
+    color: 'white',
+    marginBottom: 5,
   },
   mapSubtext: {
-    fontSize: 14,
-    color: '#7F8C8D',
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.8)',
   },
   locationPin: {
     position: 'absolute',
     top: '50%',
     left: '50%',
-    marginLeft: -15,
-    marginTop: -15,
+    marginLeft: -20,
+    marginTop: -20,
+  },
+  pinGlow: {
+    position: 'absolute',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    top: -5,
+    left: -5,
   },
   pinIcon: {
     fontSize: 30,
   },
   locationSection: {
+    marginBottom: 30,
+    paddingHorizontal: 20,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 20,
   },
+  sectionIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 15,
+  },
+  sectionIcon: {
+    fontSize: 20,
+  },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#2C3E50',
-    marginBottom: 12,
+    color: '#1e293b',
   },
   locationCard: {
     backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 20,
+    padding: 25,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
   },
   locationRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    alignItems: 'center',
+    marginBottom: 15,
+    paddingBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  locationLabelContainer: {
+    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
   },
   locationLabel: {
     fontSize: 14,
-    color: '#7F8C8D',
+    color: '#6366f1',
     fontWeight: '600',
   },
   locationValue: {
     fontSize: 14,
-    color: '#2C3E50',
+    color: '#1e293b',
     fontWeight: '600',
     flex: 1,
     textAlign: 'right',
+    marginLeft: 15,
   },
   controlsSection: {
-    marginBottom: 20,
+    marginBottom: 30,
+    paddingHorizontal: 20,
   },
   startSharingButton: {
-    backgroundColor: '#27AE60',
+    marginBottom: 15,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  stopSharingButton: {
+    marginBottom: 15,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  shareButton: {
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  buttonGradient: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-    borderRadius: 12,
-    marginBottom: 12,
+    paddingVertical: 18,
+    paddingHorizontal: 20,
   },
   startSharingIcon: {
     fontSize: 20,
-    marginRight: 8,
+    marginRight: 12,
   },
   startSharingText: {
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
   },
-  stopSharingButton: {
-    backgroundColor: '#E74C3C',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-  },
   stopSharingIcon: {
     fontSize: 20,
-    marginRight: 8,
+    marginRight: 12,
   },
   stopSharingText: {
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
   },
-  shareButton: {
-    backgroundColor: '#3498DB',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    borderRadius: 12,
-  },
   shareButtonIcon: {
     fontSize: 20,
-    marginRight: 8,
+    marginRight: 12,
   },
   shareButtonText: {
-    color: 'white',
+    color: '#1e293b',
     fontSize: 16,
     fontWeight: 'bold',
   },
   statusSection: {
-    marginBottom: 20,
+    marginBottom: 30,
+    paddingHorizontal: 20,
   },
   statusCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    borderRadius: 12,
+    padding: 25,
+    borderRadius: 20,
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  statusIconContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 20,
   },
   statusIcon: {
     fontSize: 24,
-    marginRight: 12,
   },
   statusText: {
     flex: 1,
   },
   statusTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 4,
+    marginBottom: 8,
   },
   statusDescription: {
     fontSize: 14,
-    color: '#7F8C8D',
+    color: '#64748b',
+    lineHeight: 20,
   },
   privacySection: {
-    marginBottom: 20,
+    marginBottom: 30,
+    paddingHorizontal: 20,
   },
   privacyCard: {
     backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 20,
+    padding: 25,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  privacyIconContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 15,
   },
   privacyIcon: {
-    fontSize: 32,
-    marginBottom: 8,
+    fontSize: 28,
   },
   privacyTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#2C3E50',
-    marginBottom: 8,
-  },
-  privacyText: {
-    fontSize: 14,
-    color: '#7F8C8D',
+    color: '#1e293b',
+    marginBottom: 20,
     textAlign: 'center',
+  },
+  privacyPoints: {
+    width: '100%',
+  },
+  privacyPoint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  privacyPointIcon: {
+    fontSize: 16,
+    color: '#10b981',
+    fontWeight: 'bold',
+    marginRight: 12,
+    width: 20,
+    textAlign: 'center',
+  },
+  privacyPointText: {
+    fontSize: 14,
+    color: '#64748b',
+    flex: 1,
     lineHeight: 20,
   },
 });

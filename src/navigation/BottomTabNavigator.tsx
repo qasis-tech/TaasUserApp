@@ -1,7 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text, StyleSheet } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
+import { Ionicons } from '@react-native-vector-icons/ionicons';
 import { BottomTabParamList } from '../types';
 
 // Import screens
@@ -28,7 +28,7 @@ const BottomTabNavigator = () => {
             iconName = 'help-outline';
           }
 
-          return <Icon name={iconName} size={size} color={color} />;
+          return <Ionicons name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: '#E74C3C',
         tabBarInactiveTintColor: '#95A5A6',

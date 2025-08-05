@@ -4,10 +4,13 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
+  Modal,
   ScrollView,
+  StatusBar,
   Dimensions,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
+import { LinearGradient } from 'react-native-linear-gradient';
+import { Ionicons } from '@react-native-vector-icons/ionicons';
 
 const { width } = Dimensions.get('window');
 
@@ -18,8 +21,6 @@ interface DrawerMenuProps {
 }
 
 const DrawerMenu: React.FC<DrawerMenuProps> = ({ isVisible, onClose, navigation }) => {
-  if (!isVisible) return null;
-
   const menuItems = [
     {
       id: 'home',
@@ -27,7 +28,7 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({ isVisible, onClose, navigation 
       icon: 'home-outline',
       onPress: () => {
         onClose();
-        navigation.navigate('Home');
+        navigation.navigate('UserHome');
       },
     },
     {
@@ -36,7 +37,7 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({ isVisible, onClose, navigation 
       icon: 'calendar-outline',
       onPress: () => {
         onClose();
-        navigation.navigate('MyBookings');
+        navigation.navigate('OrderHistory');
       },
     },
     {
@@ -78,51 +79,72 @@ const DrawerMenu: React.FC<DrawerMenuProps> = ({ isVisible, onClose, navigation 
   ];
 
   return (
-    <View style={styles.overlay}>
-      <TouchableOpacity style={styles.backdrop} onPress={onClose} />
-      <View style={styles.drawer}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.userInfo}>
-            <View style={styles.avatar}>
-              <Icon name="person" size={32} color="#E74C3C" />
-            </View>
-            <View style={styles.userDetails}>
-              <Text style={styles.userName}>John Doe</Text>
-              <Text style={styles.userEmail}>john.doe@example.com</Text>
-            </View>
-          </View>
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <Icon name="close" size={24} color="#2C3E50" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Menu Items */}
-        <ScrollView style={styles.menuContainer} showsVerticalScrollIndicator={false}>
-          {menuItems.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              style={styles.menuItem}
-              onPress={item.onPress}
-            >
-              <View style={styles.menuItemContent}>
-                <Icon name={item.icon} size={24} color="#2C3E50" />
-                <Text style={styles.menuItemText}>{item.title}</Text>
+    <Modal
+      visible={isVisible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+    >
+      <View style={styles.overlay}>
+        <TouchableOpacity style={styles.backdrop} onPress={onClose} />
+        <View style={styles.drawer}>
+          {/* Header */}
+          <LinearGradient
+            colors={['#667eea', '#764ba2']}
+            style={styles.header}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <View style={styles.userInfo}>
+              <View style={styles.avatar}>
+                <Ionicons name="person" size={32} color="#6366f1" />
               </View>
-              <Icon name="chevron-forward" size={20} color="#95A5A6" />
+              <View style={styles.userDetails}>
+                <Text style={styles.userName}>John Doe</Text>
+                <Text style={styles.userEmail}>john.doe@example.com</Text>
+              </View>
+            </View>
+            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+              <Ionicons name="close" size={24} color="white" />
             </TouchableOpacity>
-          ))}
-        </ScrollView>
+          </LinearGradient>
 
-        {/* Footer */}
-        <View style={styles.footer}>
-          <TouchableOpacity style={styles.logoutButton}>
-            <Icon name="log-out-outline" size={20} color="#E74C3C" />
-            <Text style={styles.logoutText}>Logout</Text>
-          </TouchableOpacity>
+          {/* Menu Items */}
+          <ScrollView style={styles.menuContainer} showsVerticalScrollIndicator={false}>
+            {menuItems.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                style={styles.menuItem}
+                onPress={item.onPress}
+              >
+                <View style={styles.menuItemContent}>
+                  <View style={styles.menuItemIconContainer}>
+                    <Ionicons name={item.icon as any} size={24} color="#6366f1" />
+                  </View>
+                  <Text style={styles.menuItemText}>{item.title}</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          {/* Footer */}
+          <View style={styles.footer}>
+            <TouchableOpacity style={styles.logoutButton}>
+              <LinearGradient
+                colors={['#ef4444', '#dc2626']}
+                style={styles.logoutGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+              >
+                <Ionicons name="log-out-outline" size={20} color="white" />
+                <Text style={styles.logoutText}>Logout</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
-    </View>
+    </Modal>
   );
 };
 
@@ -136,11 +158,7 @@ const styles = StyleSheet.create({
     zIndex: 1000,
   },
   backdrop: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   drawer: {
@@ -149,7 +167,7 @@ const styles = StyleSheet.create({
     left: 0,
     width: width * 0.8,
     height: '100%',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'white',
     shadowColor: '#000',
     shadowOffset: {
       width: 2,
@@ -160,93 +178,106 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
     paddingTop: 60,
-    paddingBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    paddingHorizontal: 20,
+    paddingBottom: 30,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
   userInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
+    marginBottom: 20,
   },
   avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#F8F9FA',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 15,
   },
   userDetails: {
     flex: 1,
   },
   userName: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#2C3E50',
-    marginBottom: 2,
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 4,
   },
   userEmail: {
     fontSize: 14,
-    color: '#7F8C8D',
+    color: 'rgba(255, 255, 255, 0.8)',
   },
   closeButton: {
+    position: 'absolute',
+    top: 60,
+    right: 20,
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   menuContainer: {
     flex: 1,
-    paddingTop: 10,
+    paddingHorizontal: 20,
+    paddingTop: 20,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F8F9FA',
+    paddingVertical: 15,
+    paddingHorizontal: 15,
+    marginBottom: 5,
+    borderRadius: 12,
+    backgroundColor: '#f8fafc',
   },
   menuItemContent: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
   },
+  menuItemIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 15,
+  },
   menuItemText: {
     fontSize: 16,
-    color: '#2C3E50',
-    marginLeft: 16,
+    color: '#1e293b',
     fontWeight: '500',
   },
   footer: {
     paddingHorizontal: 20,
     paddingVertical: 20,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: '#e2e8f0',
   },
   logoutButton: {
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  logoutGradient: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 8,
-    backgroundColor: '#FEF2F2',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
   },
   logoutText: {
+    color: 'white',
     fontSize: 16,
-    color: '#E74C3C',
     fontWeight: '600',
-    marginLeft: 8,
+    marginLeft: 10,
   },
 });
 

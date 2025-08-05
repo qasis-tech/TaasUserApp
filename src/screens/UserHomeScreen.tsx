@@ -9,9 +9,12 @@ import {
   StatusBar,
   FlatList,
   ActivityIndicator,
+  Modal,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Icon from 'react-native-vector-icons/Ionicons';
+import { LinearGradient } from 'react-native-linear-gradient';
+import { Ionicons } from '@react-native-vector-icons/ionicons';
 import DrawerMenu from '../components/DrawerMenu';
 import {
   showSuccessToast,
@@ -31,13 +34,16 @@ import {
   LocationError,
 } from '../utils/locationUtils';
 
+const { width, height } = Dimensions.get('window');
+
 interface UserHomeScreenProps {
   navigation: any;
 }
 
 const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState('all');
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
   const [currentLocation, setCurrentLocation] = useState<LocationData | null>(null);
   const [locationAddress, setLocationAddress] = useState<string>('');
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
@@ -264,88 +270,118 @@ const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ navigation }) => {
     })
     .filter(bathroom => {
       const matchesSearch = bathroom.title.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesFilter = selectedFilter === 'all' || 
-        bathroom.type === selectedFilter || 
-        bathroom.gender === selectedFilter;
+      const matchesFilter =
+        selectedFilters.length === 0 ||
+        selectedFilters.includes('all') ||
+        selectedFilters.includes(bathroom.type) ||
+        selectedFilters.includes(bathroom.gender);
       return matchesSearch && matchesFilter;
     })
     .sort((a, b) => a.distance - b.distance); // Sort by distance
+
+  const toggleFilter = (key: string) => {
+    setSelectedFilters((prev) =>
+      prev.includes(key) ? prev.filter(f => f !== key) : [...prev, key]
+    );
+  };
+
+  const clearFilters = () => setSelectedFilters([]);
+
+  const isFilterSelected = (key: string) => selectedFilters.includes(key);
 
   const renderBathroomCard = ({ item }: { item: any }) => (
     <TouchableOpacity
       style={styles.bathroomCard}
       onPress={() => navigation.navigate('BathroomDetails', { bathroomId: item.id })}>
-      <View style={styles.cardHeader}>
-        <Text style={styles.bathroomImage}>{item.image}</Text>
-        <View style={styles.cardInfo}>
-          <Text style={styles.bathroomTitle}>{item.title}</Text>
-          <Text style={styles.bathroomDistance}>📍 {item.distanceText}</Text>
-        </View>
-        <View style={styles.priceContainer}>
-          <Text style={styles.price}>₹{item.price}</Text>
-          <Text style={styles.priceUnit}>/hour</Text>
-        </View>
-      </View>
-      
-      <View style={styles.cardDetails}>
-        <View style={styles.ratingContainer}>
-          <Text style={styles.rating}>⭐ {item.rating}</Text>
-          <Text style={styles.reviewCount}>({item.reviewCount} reviews)</Text>
+      <LinearGradient
+        colors={['rgba(255, 255, 255, 0.9)', 'rgba(255, 255, 255, 0.95)']}
+        style={styles.cardGradient}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        <View style={styles.cardHeader}>
+          <View style={styles.bathroomImageContainer}>
+            <Text style={styles.bathroomImage}>{item.image}</Text>
+          </View>
+          <View style={styles.cardInfo}>
+            <Text style={styles.bathroomTitle}>{item.title}</Text>
+            <View style={styles.distanceContainer}>
+              <Ionicons name="location" size={14} color="#6366f1" />
+              <Text style={styles.bathroomDistance}>{item.distanceText}</Text>
+            </View>
+          </View>
+          <View style={styles.priceContainer}>
+            <Text style={styles.price}>₹{item.price}</Text>
+            <Text style={styles.priceUnit}>/hour</Text>
+          </View>
         </View>
         
-        <View style={styles.tagsContainer}>
-          <View style={styles.tag}>
-            <Text style={styles.tagText}>
-              {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
-            </Text>
+        <View style={styles.cardDetails}>
+          <View style={styles.ratingContainer}>
+            <Ionicons name="star" size={16} color="#f59e0b" />
+            <Text style={styles.rating}>{item.rating}</Text>
+            <Text style={styles.reviewCount}>({item.reviewCount} reviews)</Text>
           </View>
-          <View style={styles.tag}>
-            <Text style={styles.tagText}>
-              {item.gender === 'other' ? 'Unisex' : 
-               item.gender.charAt(0).toUpperCase() + item.gender.slice(1)}
-            </Text>
+          
+          <View style={styles.tagsContainer}>
+            <View style={styles.tag}>
+              <Text style={styles.tagText}>
+                {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
+              </Text>
+            </View>
+            <View style={styles.tag}>
+              <Text style={styles.tagText}>
+                {item.gender === 'other' ? 'Unisex' : 
+                 item.gender.charAt(0).toUpperCase() + item.gender.slice(1)}
+              </Text>
+            </View>
           </View>
         </View>
-      </View>
-      
-      <View style={styles.cardFooter}>
-        <View style={[
-          styles.availabilityBadge,
-          { backgroundColor: item.isAvailable ? '#27AE60' : '#E74C3C' }
-        ]}>
-          <Text style={styles.availabilityText}>
-            {item.isAvailable ? 'Available' : 'Unavailable'}
-          </Text>
+        
+        <View style={styles.cardFooter}>
+          <View style={[
+            styles.availabilityBadge,
+            { backgroundColor: item.isAvailable ? '#10b981' : '#ef4444' }
+          ]}>
+            <Text style={styles.availabilityText}>
+              {item.isAvailable ? 'Available' : 'Unavailable'}
+            </Text>
+          </View>
+          <TouchableOpacity
+            style={[
+              styles.bookButton,
+              !item.isAvailable && styles.bookButtonDisabled
+            ]}
+            disabled={!item.isAvailable}
+            onPress={() => navigation.navigate('BathroomDetails', { bathroomId: item.id })}>
+            <Text style={styles.bookButtonText}>
+              {item.isAvailable ? 'Book Now' : 'Unavailable'}
+            </Text>
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          style={[
-            styles.bookButton,
-            !item.isAvailable && styles.bookButtonDisabled
-          ]}
-          disabled={!item.isAvailable}
-          onPress={() => navigation.navigate('BathroomDetails', { bathroomId: item.id })}>
-          <Text style={styles.bookButtonText}>
-            {item.isAvailable ? 'Book Now' : 'Unavailable'}
-          </Text>
-        </TouchableOpacity>
-      </View>
+      </LinearGradient>
     </TouchableOpacity>
   );
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F8F9FA" />
-      
-      <View style={styles.header}>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      {/* Hero Header */}
+      <LinearGradient
+        colors={['#667eea', '#764ba2']}
+        style={styles.heroHeader}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
         <View style={styles.headerTop}>
           <TouchableOpacity
             style={styles.menuButton}
             onPress={() => setIsDrawerVisible(true)}>
-            <Icon name="menu" size={24} color="#2C3E50" />
+            <Ionicons name="menu" size={24} color="white" />
           </TouchableOpacity>
           <View style={styles.locationHeader}>
             <View style={styles.locationIconContainer}>
-              <Text style={styles.locationIcon}>📍</Text>
+              <Ionicons name="location" size={20} color="white" />
             </View>
             <View style={styles.locationTextContainer}>
               {isLoadingLocation ? (
@@ -366,7 +402,7 @@ const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ navigation }) => {
           <TouchableOpacity
             style={styles.profileButton}
             onPress={() => navigation.navigate('Profile')}>
-            <Icon name="person" size={24} color="#2C3E50" />
+            <Ionicons name="person" size={24} color="white" />
           </TouchableOpacity>
         </View>
         
@@ -387,41 +423,52 @@ const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ navigation }) => {
             </View>
           </View>
         )}
-      </View>
+      </LinearGradient>
 
+      {/* Search Section */}
       <View style={styles.searchContainer}>
         <View style={styles.searchInputContainer}>
-          <Text style={styles.searchIcon}>🔍</Text>
+          <Ionicons name="search" size={20} color="#6366f1" style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
             value={searchQuery}
             onChangeText={setSearchQuery}
             placeholder="Search bathrooms..."
-            placeholderTextColor="#95A5A6"
+            placeholderTextColor="#94a3b8"
           />
+          <TouchableOpacity 
+            style={styles.filterButton}
+            onPress={() => setIsFilterModalVisible(true)}>
+            <Ionicons name="filter" size={22} color="#6366f1" />
+          </TouchableOpacity>
         </View>
       </View>
 
-      <View style={styles.filtersContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {filters.map((filter) => (
+      {/* Selected Filters Display */}
+      {selectedFilters.length > 0 && (
+        <View style={styles.selectedFiltersContainer}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {selectedFilters.map((filterKey) => {
+              const filter = filters.find(f => f.key === filterKey);
+              return (
+                <View key={filterKey} style={styles.selectedFilterChip}>
+                  <Text style={styles.selectedFilterText}>{filter?.label}</Text>
+                  <TouchableOpacity
+                    onPress={() => toggleFilter(filterKey)}
+                    style={styles.removeFilterButton}>
+                    <Ionicons name="close" size={14} color="white" />
+                  </TouchableOpacity>
+                </View>
+              );
+            })}
             <TouchableOpacity
-              key={filter.key}
-              style={[
-                styles.filterButton,
-                selectedFilter === filter.key && styles.filterButtonActive
-              ]}
-              onPress={() => setSelectedFilter(filter.key)}>
-              <Text style={[
-                styles.filterButtonText,
-                selectedFilter === filter.key && styles.filterButtonTextActive
-              ]}>
-                {filter.label}
-              </Text>
+              style={styles.clearAllFiltersButton}
+              onPress={clearFilters}>
+              <Text style={styles.clearAllFiltersText}>Clear All</Text>
             </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
+          </ScrollView>
+        </View>
+      )}
 
       <View style={styles.content}>
         <View style={styles.sectionHeader}>
@@ -438,6 +485,58 @@ const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ navigation }) => {
         />
       </View>
       
+      {/* Filter Modal */}
+      <Modal
+        visible={isFilterModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setIsFilterModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Filter Bathrooms</Text>
+              <TouchableOpacity
+                onPress={() => setIsFilterModalVisible(false)}
+                style={styles.closeModalButton}>
+                <Ionicons name="close" size={24} color="#1e293b" />
+              </TouchableOpacity>
+            </View>
+            
+            <ScrollView style={styles.filterList}>
+              {filters.map(filter => (
+                <TouchableOpacity
+                  key={filter.key}
+                  style={styles.filterOption}
+                  onPress={() => toggleFilter(filter.key)}
+                >
+                  <Ionicons
+                    name={isFilterSelected(filter.key) ? "checkbox" : "square-outline"}
+                    size={22}
+                    color={isFilterSelected(filter.key) ? "#6366f1" : "#64748b"}
+                    style={styles.filterCheckbox}
+                  />
+                  <Text style={styles.filterOptionText}>{filter.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            
+            <View style={styles.modalFooter}>
+              <TouchableOpacity 
+                style={styles.clearFiltersButton}
+                onPress={clearFilters}>
+                <Text style={styles.clearFiltersText}>Clear All</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.applyFiltersButton}
+                onPress={() => setIsFilterModalVisible(false)}>
+                <Text style={styles.applyFiltersText}>Apply Filters</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+      
       {/* Drawer Menu */}
       <DrawerMenu
         isVisible={isDrawerVisible}
@@ -451,13 +550,12 @@ const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#f8fafc',
   },
-  header: {
+  heroHeader: {
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 10,
     paddingBottom: 20,
-    backgroundColor: 'white',
   },
   headerTop: {
     flexDirection: 'row',
@@ -469,7 +567,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 10,
@@ -487,90 +585,80 @@ const styles = StyleSheet.create({
   locationTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#2C3E50',
+    color: 'white',
     marginBottom: 2,
-  },
-  greeting: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#2C3E50',
   },
   profileButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  profileButtonText: {
-    fontSize: 20,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#7F8C8D',
   },
   searchContainer: {
     paddingHorizontal: 20,
     paddingVertical: 15,
     backgroundColor: 'white',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  testLocationButton: {
-    backgroundColor: '#3498DB',
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  testLocationButtonText: {
-    fontSize: 16,
-    color: 'white',
+    borderBottomColor: '#e2e8f0',
   },
   searchInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8F9FA',
-    borderRadius: 12,
+    backgroundColor: '#f1f5f9',
+    borderRadius: 16,
     paddingHorizontal: 15,
+    flex: 1,
   },
   searchIcon: {
-    fontSize: 16,
     marginRight: 10,
   },
   searchInput: {
     flex: 1,
     paddingVertical: 12,
     fontSize: 16,
-    color: '#2C3E50',
-  },
-  filtersContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    backgroundColor: 'white',
+    color: '#1e293b',
   },
   filterButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#F8F9FA',
-    marginRight: 10,
+    padding: 8,
   },
-  filterButtonActive: {
-    backgroundColor: '#E74C3C',
+  selectedFiltersContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: 'white',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
   },
-  filterButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#2C3E50',
+  selectedFilterChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#6366f1',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginRight: 8,
   },
-  filterButtonTextActive: {
+  selectedFilterText: {
     color: 'white',
+    fontSize: 12,
+    fontWeight: '600',
+    marginRight: 4,
+  },
+  removeFilterButton: {
+    marginLeft: 4,
+  },
+  clearAllFiltersButton: {
+    backgroundColor: '#94a3b8',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginLeft: 8,
+  },
+  clearAllFiltersText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '600',
   },
   content: {
     flex: 1,
@@ -585,37 +673,47 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#2C3E50',
+    color: '#1e293b',
   },
   resultCount: {
     fontSize: 14,
-    color: '#7F8C8D',
+    color: '#64748b',
   },
   listContainer: {
     paddingBottom: 20,
   },
   bathroomCard: {
-    backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 16,
     marginBottom: 15,
+    borderRadius: 20,
+    overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 4,
     },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  cardGradient: {
+    padding: 20,
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 15,
+  },
+  bathroomImageContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 15,
   },
   bathroomImage: {
-    fontSize: 32,
-    marginRight: 12,
+    fontSize: 24,
   },
   cardInfo: {
     flex: 1,
@@ -623,12 +721,17 @@ const styles = StyleSheet.create({
   bathroomTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#2C3E50',
+    color: '#1e293b',
     marginBottom: 4,
+  },
+  distanceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   bathroomDistance: {
     fontSize: 14,
-    color: '#7F8C8D',
+    color: '#6366f1',
+    marginLeft: 4,
   },
   priceContainer: {
     alignItems: 'flex-end',
@@ -636,17 +739,17 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#E74C3C',
+    color: '#ef4444',
   },
   priceUnit: {
     fontSize: 12,
-    color: '#95A5A6',
+    color: '#94a3b8',
   },
   cardDetails: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 15,
   },
   ratingContainer: {
     flexDirection: 'row',
@@ -655,11 +758,12 @@ const styles = StyleSheet.create({
   rating: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#F39C12',
+    color: '#f59e0b',
+    marginLeft: 4,
   },
   reviewCount: {
     fontSize: 12,
-    color: '#95A5A6',
+    color: '#94a3b8',
     marginLeft: 4,
   },
   tagsContainer: {
@@ -667,7 +771,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   tag: {
-    backgroundColor: '#F8F9FA',
+    backgroundColor: 'rgba(99, 102, 241, 0.1)',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
@@ -675,7 +779,7 @@ const styles = StyleSheet.create({
   tagText: {
     fontSize: 10,
     fontWeight: '600',
-    color: '#2C3E50',
+    color: '#6366f1',
   },
   cardFooter: {
     flexDirection: 'row',
@@ -693,13 +797,13 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   bookButton: {
-    backgroundColor: '#E74C3C',
+    backgroundColor: '#6366f1',
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 8,
+    borderRadius: 12,
   },
   bookButtonDisabled: {
-    backgroundColor: '#95A5A6',
+    backgroundColor: '#94a3b8',
   },
   bookButtonText: {
     color: 'white',
@@ -713,45 +817,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 10,
   },
-  locationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F8F9FA',
-    borderRadius: 12,
-    padding: 12,
-    marginVertical: 10,
-  },
   locationIconContainer: {
     marginRight: 10,
   },
-  locationIcon: {
-    fontSize: 20,
-  },
-  locationInfo: {
-    flex: 1,
-  },
-  locationLoading: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
   locationLoadingText: {
     fontSize: 14,
-    color: '#7F8C8D',
+    color: 'rgba(255, 255, 255, 0.8)',
     marginLeft: 8,
   },
   locationAddress: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#2C3E50',
+    color: 'white',
     marginBottom: 4,
-  },
-  refreshLocationButton: {
-    alignSelf: 'flex-start',
-  },
-  refreshLocationText: {
-    fontSize: 12,
-    color: '#E74C3C',
-    fontWeight: '600',
   },
   locationErrorContainer: {
     flexDirection: 'row',
@@ -762,7 +840,7 @@ const styles = StyleSheet.create({
   },
   locationErrorText: {
     fontSize: 14,
-    color: '#E74C3C',
+    color: '#fecaca',
     fontWeight: '600',
   },
   forceRequestButton: {
@@ -770,7 +848,80 @@ const styles = StyleSheet.create({
   },
   forceRequestText: {
     fontSize: 14,
-    color: '#3498DB',
+    color: '#bfdbfe',
+    fontWeight: '600',
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1e293b',
+  },
+  closeModalButton: {
+    padding: 4,
+  },
+  filterList: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  filterOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  filterCheckbox: {
+    marginRight: 12,
+  },
+  filterOptionText: {
+    fontSize: 16,
+    color: '#1e293b',
+  },
+  modalFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
+  },
+  clearFiltersButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: '#f1f5f9',
+  },
+  clearFiltersText: {
+    color: '#64748b',
+    fontWeight: '600',
+  },
+  applyFiltersButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: '#6366f1',
+  },
+  applyFiltersText: {
+    color: 'white',
     fontWeight: '600',
   },
 });
